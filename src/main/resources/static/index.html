@@ -3,82 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>ESB Demo page</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
     <!--Мы живем за великой стеной-->
-    <link rel="stylesheet" href="asserts/bootstrap/css/bootstrap.min.css">
+    <link href="asserts/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script src="asserts/jquery-3.3.1.min.js"></script>
     <script src="asserts/bootstrap/js/bootstrap.min.js"></script>
     <script src="asserts/angular.min.js"></script>
-    <script type="text/javascript" src="dateCtrl.js"></script>
 
-
-    <!-- Date-picker JavaScript File -->
-
-    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
-
-    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
-
-
-
-    <!-- AngularJs JavaScript File -->
-
-    <!--<script type="text/javascript" src="resource/js/angular_v1.6.0.js"></script>-->
-
-    <script type="text/javascript" src="resource/js/dateCtrl.js"></script>
-
-    <!-- Bootstrap CSS -->
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
-
-    <link rel="stylesheet" href="resource/css/dateCtrl.css">
-
-
-
-
-    <script type="text/javascript">
-        var mainApp = angular.module("DMZ_App", []);
-
-        mainApp.directive("datepicker", function () {
-
-
-
-            function link(scope, element, attrs, controller) {
-
-
-
-                // CALLING THE "datepicker()" METHOD USING THE "element" OBJECT
-
-                element.datepicker({
-                    onSelect: function (val) {
-                        scope.$apply(function () {
-                            // UPDATING THE VIEW VALUE WITH THE SELECTED DATE
-                            controller.$setViewValue(val);
-                        });
-                    },
-                    dateFormat: "dd-mm-yy"
-                });
-            }
-            return {
-                require: 'ngModel',
-                link: link
-            };
-        });
-    </script>
 
     <script type="text/javascript">
         var app = angular.module("DMZ_App", []);
         app.controller("DMZController", function ($scope, $http) {
 
-
-
             _initPage();
+            $scope.startDate = new Date();
+            $scope.endDate = new Date();
+            $scope.st = new Date();
+            $scope.bdaytime = new Date();
 
             $scope.getRequest = function () {
                 $http({
                     method: 'GET',
-                    url: 'http://localhost:8090/scout/api/data/terminal/availableIds',
+                    url: 'http://localhost:8090/scout/api/units/availableIds',
                 }).then(function successCallback(response) {
                     // $scope.correlationId = response.data.correlationId;
                     // $scope.requestTextMessage = response.data.textMessage;
@@ -88,10 +34,24 @@
                 });
             };
 
-            $scope.getResponse = function (corId) {
+            // YYYY/mm/dd HH:MM:SS
+            $scope.getFuel = function (id, startDate, endDate) {
+
+                console.log('Start: ' + bdaytime.value);
+                console.log('IN: ' + startDate);
+                console.log('MODIFIED: ' + startDate);
+                console.log('MODIFIED: ' + startDate.toString());
+
+                var dateControl = document.getElementById('dateFrom');
+                console.log('OUT: ' + dateControl);
+                console.log('OUT2: ' + dateControl.value);
+
                 $http({
                     method: 'GET',
-                    url: '/dmz-api/resultId/'+corId,
+                    url: 'http://localhost:8090/scout/statistics/fuel?' +
+                        'request.unitId=' + id +
+                        '&request.unitId=' + startDate +
+                        '&request.unitId=' + endDate.toString(),
                 }).then(function successCallback(response) {
                     $scope.correlationId = response.data.correlationId;
                     $scope.responseTextMessage = response.data.messageText;
@@ -100,21 +60,10 @@
                 });
             };
 
-            $scope.getIds = function () {
-                http({
-                    method:'GET',
-                    url: 'http://localhost:8090/scout/api/data/terminal/availableIds',
-                }).then(function successCallback(response) {
-                    $scope.Ids = response.data;
-                }, function errorCallback(response) {
-                    console.log('Error');
-                });
-            };
-
             function _initPage() {
                 $http({
-                    method:'GET',
-                    url: 'http://localhost:8090/scout/api/data/terminal/availableIds',
+                    method: 'GET',
+                    url: 'http://localhost:8090/scout/api/units/availableIds',
                 }).then(function successCallback(response) {
                     $scope.Ids = response.data;
                 }, function errorCallback(response) {
@@ -131,8 +80,8 @@
 <div class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">ESB demo</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+                data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -153,19 +102,36 @@
 <p>Запрос:</p>
 
 
-<div class="sample" align="left">
+<div align="left" class="sample">
     <p6>Id объекта мониторинга</p6>
-    <select ng-model="selected"
-            ng-options="opt as opt for opt in Ids"
-            ng-init="selected='Ничего не выбрано'"></select>
+    <select ng-init="selected='Ничего не выбрано'"
+            ng-model="selected"
+            ng-options="opt as opt for opt in Ids"></select>
     <h3>Выбран : {{selected}}</h3>
 
 
     <form class="form-inline">
         <div class="form-group form-inline">
             <label class="control-label col-sm-3 col-lg-3" for="dateFrom">Период от</label>
-            <div class="col-sm-10">
-                <input type="date" class="form-control" id="dateFrom" placeholder="Введите дату">
+            <div class="col-sm-9">
+                <input ng-value="startDate"
+                       name="bdaytime"
+                       ng-model="st"
+                       class="form-control"
+                       id="dateFrom"
+                       placeholder="Введите дату"
+                       type="datetime-local">
+            </div>
+        </div>
+
+        <div class="form-group form-inline">
+            <label class="control-label col-sm-3 col-lg-3" for="dateTo">Период по</label>
+            <div class="col-sm-9">
+                <input ng-value="endDate"
+                       class="form-control"
+                       id="dateTo"
+                       placeholder="Введите дату"
+                       type="datetime-local">
             </div>
         </div>
 
@@ -173,31 +139,17 @@
     </form>
 
 
-
-    <button ng-click="getIds()"
-            class="btn btn-outline-success my-2 my-sm-0"
+    <button class="btn btn-outline-success my-2 my-sm-0"
+            ng-click="getFuel(selected, startDate, endDate)"
     >Получить
     </button>
 </div>
 
-<H3>КалендарЪ</H3>
-<div class="container">
-    <div class="form-group">
-        <label for="date">Select Date:</label><input id="date" name="date" type="text" datepicker ng-model="dateValue" placeholder="Enter Date ..." />
-        <div id="dateOutput" class="pTop">
-            <h6 class="text-success">Date: {{ dateValue }}</h6>
-        </div>
-    </div>
-</div>
+
+<!--<h1>SWAGGER</h1>-->
 
 
-
-<h1>SWAGGER</h1>
-
-
-
-<iframe class="container" src="http://localhost:8090/webjars/swagger-ui/index.html?url=http://localhost:8090/scout/api-doc"></iframe>
-
+<!--<iframe class=".container" src="http://localhost:8090/webjars/swagger-ui/index.html?url=http://localhost:8090/scout/api-doc"></iframe>-->
 
 
 </body>
