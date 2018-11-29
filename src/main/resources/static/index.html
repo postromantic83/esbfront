@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ESB Demo page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--Мы живем за великой стеной-->
+    <link rel="stylesheet" href="asserts/bootstrap/css/bootstrap.min.css">
+    <script src="asserts/jquery-3.3.1.min.js"></script>
+    <script src="asserts/bootstrap/js/bootstrap.min.js"></script>
+    <script src="asserts/angular.min.js"></script>
+    <script type="text/javascript" src="dateCtrl.js"></script>
+
+
+    <!-- Date-picker JavaScript File -->
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+
+
+
+    <!-- AngularJs JavaScript File -->
+
+    <!--<script type="text/javascript" src="resource/js/angular_v1.6.0.js"></script>-->
+
+    <script type="text/javascript" src="resource/js/dateCtrl.js"></script>
+
+    <!-- Bootstrap CSS -->
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
+
+    <link rel="stylesheet" href="resource/css/dateCtrl.css">
+
+
+
+
+    <script type="text/javascript">
+        var mainApp = angular.module("DMZ_App", []);
+
+        mainApp.directive("datepicker", function () {
+
+
+
+            function link(scope, element, attrs, controller) {
+
+
+
+                // CALLING THE "datepicker()" METHOD USING THE "element" OBJECT
+
+                element.datepicker({
+                    onSelect: function (val) {
+                        scope.$apply(function () {
+                            // UPDATING THE VIEW VALUE WITH THE SELECTED DATE
+                            controller.$setViewValue(val);
+                        });
+                    },
+                    dateFormat: "dd-mm-yy"
+                });
+            }
+            return {
+                require: 'ngModel',
+                link: link
+            };
+        });
+    </script>
+
+    <script type="text/javascript">
+        var app = angular.module("DMZ_App", []);
+        app.controller("DMZController", function ($scope, $http) {
+
+
+
+            _initPage();
+
+            $scope.getRequest = function () {
+                $http({
+                    method: 'GET',
+                    url: 'http://localhost:8090/scout/api/data/terminal/availableIds',
+                }).then(function successCallback(response) {
+                    // $scope.correlationId = response.data.correlationId;
+                    // $scope.requestTextMessage = response.data.textMessage;
+                    $scope.Ids = response.data;
+                }, function errorCallback(response) {
+                    console.log('Error');
+                });
+            };
+
+            $scope.getResponse = function (corId) {
+                $http({
+                    method: 'GET',
+                    url: '/dmz-api/resultId/'+corId,
+                }).then(function successCallback(response) {
+                    $scope.correlationId = response.data.correlationId;
+                    $scope.responseTextMessage = response.data.messageText;
+                }, function errorCallback(response) {
+                    console.log('Error');
+                });
+            };
+
+            $scope.getIds = function () {
+                http({
+                    method:'GET',
+                    url: 'http://localhost:8090/scout/api/data/terminal/availableIds',
+                }).then(function successCallback(response) {
+                    $scope.Ids = response.data;
+                }, function errorCallback(response) {
+                    console.log('Error');
+                });
+            };
+
+            function _initPage() {
+                $http({
+                    method:'GET',
+                    url: 'http://localhost:8090/scout/api/data/terminal/availableIds',
+                }).then(function successCallback(response) {
+                    $scope.Ids = response.data;
+                }, function errorCallback(response) {
+                    console.log('Error');
+                });
+            };
+
+
+        });
+    </script>
+</head>
+
+<body ng-app="DMZ_App" ng-controller="DMZController">
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">ESB demo</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Скаут<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Личный кабинет</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>
+
+
+<p>Запрос:</p>
+
+
+<div class="sample" align="left">
+    <p6>Id объекта мониторинга</p6>
+    <select ng-model="selected"
+            ng-options="opt as opt for opt in Ids"
+            ng-init="selected='Ничего не выбрано'"></select>
+    <h3>Выбран : {{selected}}</h3>
+
+
+    <form class="form-inline">
+        <div class="form-group form-inline">
+            <label class="control-label col-sm-3 col-lg-3" for="dateFrom">Период от</label>
+            <div class="col-sm-10">
+                <input type="date" class="form-control" id="dateFrom" placeholder="Введите дату">
+            </div>
+        </div>
+
+
+    </form>
+
+
+
+    <button ng-click="getIds()"
+            class="btn btn-outline-success my-2 my-sm-0"
+    >Получить
+    </button>
+</div>
+
+<H3>КалендарЪ</H3>
+<div class="container">
+    <div class="form-group">
+        <label for="date">Select Date:</label><input id="date" name="date" type="text" datepicker ng-model="dateValue" placeholder="Enter Date ..." />
+        <div id="dateOutput" class="pTop">
+            <h6 class="text-success">Date: {{ dateValue }}</h6>
+        </div>
+    </div>
+</div>
+
+
+
+<h1>SWAGGER</h1>
+
+
+
+<iframe class="container" src="http://localhost:8090/webjars/swagger-ui/index.html?url=http://localhost:8090/scout/api-doc"></iframe>
+
+
+
+</body>
+</html>
